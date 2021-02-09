@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow-definition plugin="workflow-job@2.40">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.7.2"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.7.2">
+      <jobProperties/>
+      <triggers/>
+      <parameters/>
+      <options/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description/>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>APOLLO_META</name>
+          <description>Apollo MetaServer </description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>http://conf-meta-daily.xiniunet.com:8007</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>ENV</name>
+          <description>发布的环境</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>daily</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>REPOSITORY</name>
+          <description>镜像仓库</description>
+          <defaultValue>192.168.20.200:50000</defaultValue>
+          <trim>true</trim>
+        </hudson.model.TextParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>TYPE</name>
+          <description/>
+          <defaultValue>jdk</defaultValue>
+          <trim>true</trim>
+        </hudson.model.TextParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>MODULE</name>
+          <description>需要发布的模块,为空发布当前项目</description>
+          <defaultValue>log-businiess</defaultValue>
+          <trim>true</trim>
+        </hudson.model.TextParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>NAMESPACE</name>
+          <description>发布项目到那个空间</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>xiniunet</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>REPLICA_COUNT</name>
+          <description>发布的实例个数</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>1</string>
+              <string>2</string>
+              <string>3</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>MAX_CPU</name>
+          <description>每个实例需要多少核cpu 1000=1核</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>1000m</string>
+              <string>2000m</string>
+              <string>3000m</string>
+              <string>4000m</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>MAX_MEMORY</name>
+          <description>每个实例需要的最大内存</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>512</string>
+              <string>1024</string>
+              <string>2048</string>
+              <string>4096</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>GIT_URL</name>
+          <description>Git地址</description>
+          <defaultValue>http://gitlab.xiniunet.com/rd/log.git</defaultValue>
+          <trim>true</trim>
+        </hudson.model.TextParameterDefinition>
+        <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@0.9.13">
+          <name>BRANCH_OR_TAG</name>
+          <description>分支后者Tag默认显示20</description>
+          <uuid>9d2f20ed-c9ab-487e-9988-aa7ef24fb915</uuid>
+          <type>PT_BRANCH_TAG</type>
+          <branch/>
+          <tagFilter>*</tagFilter>
+          <branchFilter>.*</branchFilter>
+          <sortMode>DESCENDING</sortMode>
+          <defaultValue>origin/master</defaultValue>
+          <selectedValue>NONE</selectedValue>
+          <useRepository>http://gitlab.xiniunet.com/rd/log.git</useRepository>
+          <quickFilterEnabled>false</quickFilterEnabled>
+          <listSize>5</listSize>
+        </net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>HOST</name>
+          <description>访问服务域名</description>
+          <defaultValue> </defaultValue>
+          <trim>true</trim>
+        </hudson.model.TextParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>INGRESS_ENABLED</name>
+          <description>是否通过网关暴露服务</description>
+          <defaultValue>false</defaultValue>
+          <trim>true</trim>
+        </hudson.model.TextParameterDefinition>
+        <com.cloudbees.plugins.credentials.CredentialsParameterDefinition plugin="credentials@2.3.14">
+          <name>GIT_CREADENTIAL</name>
+          <description>Git 凭据</description>
+          <defaultValue>1be5a580-ed7f-42bf-b3fb-c1d70c648a4d</defaultValue>
+          <credentialType>com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl</credentialType>
+          <required>true</required>
+        </com.cloudbees.plugins.credentials.CredentialsParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>ENABLED_20880</name>
+          <description>是否监听20880端口</description>
+          <defaultValue>true</defaultValue>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>ENABLED_80</name>
+          <description>是否监听80端口</description>
+          <defaultValue>false</defaultValue>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>30</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.87">
+    <script>def createImageSuffix() {
+    // 定义一个版本号作为当次构建的版本，输出结果 201912_69
+    return new Date().format('yyyyMMdd') + "-${env.BUILD_ID}"
+}
+def getProbePort() {
+    // 根据类型确认容器暴露端口
+    if(Boolean.parseBoolean(params.ENABLED_80)){
+        return 80
+    } else if (Boolean.parseBoolean(params.ENABLED_20880)){
+        return 20880
+    }else{
+        return 80
+    }
+}
+
+def getJavaOptions() {
+    // jvm设置
+    int memory = params.MAX_MEMORY;
+    int jvmMemory = memory/2;
+    String javaOptions ='" -server -Xms' + jvmMemory  + 'm -Xmx' + jvmMemory + 'm -XX:+UseG1GC "'
+    return javaOptions
+}
+
+node {
+    
+    stage ("prepare git stage") {
+        echo '==== prepare stage start ===='
+        if(params.MODULE){
+            env.app=params.MODULE
+        }else{
+            env.app='.'
+        }
+        env.check_to = params.BRANCH_OR_TAG
+        echo '==== prepare stage end ===='
+    }
+    stage ("git stage") {
+        echo '==== git pull start ===='
+        echo env.image_version
+        echo '||'
+        git credentialsId: params.GIT_CREADENTIAL, url: params.GIT_URL
+        sh '[ -n "${check_to}" ] &amp;&amp;  git checkout ${check_to} ||  { echo -e "切换至指定BRANCH或者TAG的版本，check：${check_to} 不存在或为空，请检查输入的BRANCH和TAG!" &amp;&amp; exit 111; }'
+        echo '||'
+        echo '==== git pull end   ===='
+        }
+        stage ("mvn build stage") {
+        echo '==== mvn package begin ===='
+        echo '||'
+        sh 'cd ${app} &amp;&amp; mvn clean package -Dmaven.test.skip=true -U -T 1C'
+        
+        echo '||'
+        echo '==== mvn package  end   ===='
+    }
+    stage ("prepare install stage") {
+
+        echo '==== prepare install stage start ===='
+        //定义全局环境变量   
+        env.max_cpu=params.MAX_CPU
+        env.max_memory=params.MAX_MEMORY + 'Mi'
+        env.replica_count=params.REPLICA_COUNT
+        env.publish_to=params.ENV
+        env.project_type=params.TYPE
+        pom = readMavenPom file: "${app}/pom.xml"
+        if(pom.name){
+            env.pkg_name=pom.name
+        }else{
+            env.pkg_name=pom.artifactId
+        }
+        env.image_repository=params.REPOSITORY
+        env.project_repository=params.REPOSITORY + '/business/' + env.pkg_name.toLowerCase()
+        env.release_name=env.pkg_name.toLowerCase()
+        env.apollo_meta=params.APOLLO_META
+        env.version=pom.version
+        env.namespace=params.NAMESPACE
+        env.java_options=getJavaOptions()
+        env.image_suffix = createImageSuffix()
+        env.image_tag = env.version + '-' + env.image_suffix
+        env.pkg=env.pkg_name + '-' + env.version + '.' + pom.packaging
+        env.host = params.HOST
+        env.ingress_enabled = params.INGRESS_ENABLED
+        env.enabled_80 = params.ENABLED_80
+        env.enabled_20880 = params.ENABLED_20880
+        env.probe_port = getProbePort()
+        echo '==== prepare install stage end ===='
+    }
+    stage ("docker build and push stage") {
+        echo '==== docker build and push begin ===='
+        switch(params.TYPE) { 
+            case "jetty": 
+                sh 'mv -f ${app}/target/${pkg} /root/data/jenkins/docker/${project_type}/root.war'
+                sh 'cd /root/data/jenkins/docker/${project_type} &amp;&amp; docker build -t ${project_repository}:${image_tag} --build-arg IMAGE_REPOSITORY=${image_repository} .'
+                break;
+            case "jdk": 
+                sh 'mv -f ${app}/target/${pkg} /root/data/jenkins/docker/${project_type}/app.jar'
+                sh 'cd /root/data/jenkins/docker/${project_type} &amp;&amp; docker build -t ${project_repository}:${image_tag} --build-arg IMAGE_REPOSITORY=${image_repository} .'
+                break;
+            default:
+                println("The type is unknown"); 
+                break; 
+        }         
+        sh 'docker push ${project_repository}:${image_tag}'
+        echo '==== docker build and push end   ===='
+        echo '==== rm -f root.war  start  ===='
+        sh 'rm -rf /root/data/jenkins/docker/${project_type}/root.war'
+        echo '==== rm -f root.war  end   ===='
+    }
+    stage ("k8s helm stage") {
+        //更新helm repo
+        sh 'helm repo update'
+        def install_status = sh (
+            script: """
+                helm install ${release_name} xiniu-charts/app \
+                --kubeconfig /root/data/jenkins/k8s/${publish_to}/config \
+                --namespace ${namespace} \
+                --set namespace=${namespace} \
+                --set type=${project_type} \
+                --set replicaCount=${replica_count} \
+                --set image.repository=${project_repository} \
+                --set image.tag=${image_tag} \
+                --set resources.limits.cpu=${max_cpu} \
+                --set resources.limits.memory=${max_memory} \
+                --set resources.requests.memory=${max_memory} \
+                --set env[0].name=JAVA_OPTIONS \
+                --set env[0].value=${java_options} \
+                --set env[1].name=APOLLO_META \
+                --set env[1].value=${apollo_meta} \
+                --set ingress.enabled=${ingress_enabled} \
+                --set ingress.hosts[0].paths[0].path='/' \
+                --set ingress.hosts[0].host=${host} \
+                --set ports.enabled80=${enabled_80} \
+                --set ports.enabled20880=${enabled_20880} \
+                --set probe.port=${probe_port}
+            """,
+            returnStatus:true
+            )
+        // 已经安装 helm upgrade
+        if (install_status != 0) {
+            sh (
+                script: """
+                    helm upgrade ${release_name} xiniu-charts/app \
+                    --kubeconfig /root/data/jenkins/k8s/${publish_to}/config \
+                    --namespace ${namespace} \
+                    --set namespace=${namespace} \
+                    --set type=${project_type} \
+                    --set replicaCount=${replica_count} \
+                    --set image.repository=${project_repository} \
+                    --set image.tag=${image_tag} \
+                    --set resources.limits.cpu=${max_cpu} \
+                    --set resources.limits.memory=${max_memory} \
+                    --set resources.requests.memory=${max_memory} \
+                    --set env[0].name=JAVA_OPTIONS \
+                    --set env[0].value=${java_options} \
+                    --set env[1].name=APOLLO_META \
+                    --set env[1].value=${apollo_meta} \
+                    --set ingress.enabled=${ingress_enabled} \
+                    --set ingress.hosts[0].paths[0].path='/' \
+                    --set ingress.hosts[0].host=${host} \
+                    --set ports.enabled80=${enabled_80} \
+                    --set ports.enabled20880=${enabled_20880} \
+                    --set probe.port=${probe_port}
+                """
+            )
+        } 
+        echo '==== helm stage end ===='
+    }
+    
+    //clear up our workspace
+    cleanWs cleanWhenFailure: false, cleanWhenNotBuilt: false, cleanWhenUnstable: false
+} </script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>

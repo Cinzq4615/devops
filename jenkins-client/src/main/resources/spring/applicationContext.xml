@@ -16,5 +16,6 @@
 		<property name="url" value="${jenkins.url}" />
 		<property name="username" value="${jenkins.username}" />
 		<property name="password" value="${jenkins.password}" />
+		<property name="viewUrl" value="${jenkins.viewUrl}" />
 	</bean>
 </beans>

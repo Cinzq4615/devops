@@ -23,6 +23,8 @@ public interface JenkinsClient {
 
     Build getJobBuild(JenkinsServer jenkinsServer, String jobName, Integer buildNumber);
 
+    String addJobToView(JenkinsServer jenkinsServer, String jobName, String view);
+
 
     /**
      * 结束jenkins构建
@@ -38,7 +40,7 @@ public interface JenkinsClient {
      *
      * @param jobName
      */
-    void deleteJob(JenkinsServer jenkinsServer, String jobName);
+    void deleteJob(JenkinsServer jenkinsServer, String jobName, boolean crumbFlag);
 
     /**
      * 结束jenkins构建

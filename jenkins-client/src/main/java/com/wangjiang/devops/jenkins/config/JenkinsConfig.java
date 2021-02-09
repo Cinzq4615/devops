@@ -11,9 +11,9 @@ import org.springframework.stereotype.Component;
  **/
 @Data
 @Component
-//@ConfigurationProperties(
-//        prefix = "jenkins"
-//)
+@ConfigurationProperties(
+        prefix = "jenkins"
+)
 public class JenkinsConfig implements InitializingBean{
 
     /**
@@ -39,10 +39,21 @@ public class JenkinsConfig implements InitializingBean{
      * 通知状态地址
      */
     private String notifyUrl;
+
     /**
      * 前端项目npm打包镜像地址
      */
     private String registry;
+
+    /**
+     * 添加到指定view
+     */
+    private String viewUrl;
+
+    /**
+     * crumbIssuer Url
+     */
+    private String crumbIssuerUrl;
 
     @Override
     public void afterPropertiesSet() throws Exception {

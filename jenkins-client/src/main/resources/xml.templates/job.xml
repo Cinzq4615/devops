@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow-definition plugin="workflow-job@2.40">
+    <actions/>
+    <description/>
+    <keepDependencies>false</keepDependencies>
+    <properties>
+        <com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin="gitlab-plugin@1.5.13">
+            <gitLabConnection/>
+        </com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>
+    </properties>
+    <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.83">
+        <script>node {
+            stage ("git stage") {
+            echo '==== git pull start ===='
+            echo '||'
+            git branch: 'master', credentialsId: '02550e58-1a5c-40d8-9d67-efd78eff2436', url: 'http://192.168.33.11:10080/root/ordev-svc.git'
+            env.check_to_tag='v1.0.0'
+            sh '[ -n "${check_to_tag}" ] &amp;&amp;  git checkout ${check_to_tag} ||  { echo -e "切换至指定的tag的版本，tag：${check_to_tag} 不存在或为空，请检查输入的tag!" &amp;&amp; exit 111; }'
+            echo '||'
+            echo '==== git pull end   ===='
+            }
+            stage ("mvn build stage") {
+            echo '==== mvn begin ===='
+            echo '||'
+            sh 'mvn clean package -Dmaven.test.skip=true  -Dmaven.javadoc.skip=true -Dmaven.compile.fork=true -P local -T 1C'
+            echo '||'
+            echo '==== mvn end   ===='
+            }
+            stage ("docker build and push stage") {
+            echo '==== docker build and push begin ===='
+            sh 'mv ./order-api/target/*.jar ./docker/'
+            sh 'pwd'
+            sh 'cd ./docker &amp;&amp; docker build -t 192.168.33.20/java-test/k8s-order-svc:v1.0.0 .'
+            sh 'pwd'
+            sh 'docker push 192.168.33.20/java-test/k8s-order-svc:v1.0.0'
+            echo '==== docker build and push end   ===='
+            }
+            stage ("helm stage") {
+            echo '==== helm stage begin ===='
+            echo 'processing...'
+            echo '==== helm stage end ===='
+            }
+
+            } </script>
+        <sandbox>true</sandbox>
+    </definition>
+    <triggers/>
+    <disabled>false</disabled>
+</flow-definition>

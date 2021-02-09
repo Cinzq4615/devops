@@ -22,8 +22,8 @@ public class JenkinsClientImpl implements JenkinsClient {
 
     private static final String PREFIX_MARK = "ANALYSIS SUCCESSFUL, you can browse";
 
-    private static final String SUFFIX_MARK = "[INFO] Note that you will be able to access the updated dashboard once the server has processed the submitted analysis report";
-
+    private static final String SUFFIX_MARK = "[INFO] Note that you will be able to access the updated dashboard once" +
+            " the server has processed the submitted analysis report";
 
 
     @Override
@@ -35,21 +35,18 @@ public class JenkinsClientImpl implements JenkinsClient {
                     //jenkins 创建应用
                     jenkinsServer.createJob(jobName, jobXml, true);
                 } else {
-                    //判断job类型是否一致 之前已经创建的job类型 和现在需要创建的 job类型
-                    if (jobWithDetails.get_class().equals(jobType)) {
-                        // 修改job时，crumbFlag设置为false  crumbFlag为是否需要在请求发出之前检查一下jenkins是否有csrf保护，如果有则获取一下token，再发出请求，而我们jenkins没有这个路由，主动设为false #wangjiang 2020-11-05 11:54:51#
-                        jenkinsServer.updateJob(jobName, jobXml, true);
-                    } else {
-                        deleteJob(jenkinsServer,jobName);
-                        jenkinsServer.createJob(jobName, jobXml, true);
-                    }
+                    System.out.println("job已经存在！");
+                    //deleteJob(jenkinsServer, jobName, true);
+                    //jenkinsServer.createJob(jobName, jobXml, true);
+
                 }
                 //获取jenkins应用 build
-                jobWithDetails = jenkinsServer.getJob(jobName);
-                jobWithDetails.build(true);
-                Integer buildNumber = jobWithDetails.getNextBuildNumber();
-                log.info("JenkinsClientImpl.createJob ----------- jobName : {}, buildNumber : {}", jobName, buildNumber);
-                return buildNumber.longValue();
+                //jobWithDetails = jenkinsServer.getJob(jobName);
+                //jobWithDetails.build(false);
+                //Integer buildNumber = jobWithDetails.getNextBuildNumber();
+                //log.info("JenkinsClientImpl.createJob ----------- jobName : {}, buildNumber : {}", jobName,
+                // buildNumber);
+                return Long.valueOf(1);
             } catch (IOException e) {
                 throw new JenkinsOperateException(e);
             }
@@ -76,6 +73,11 @@ public class JenkinsClientImpl implements JenkinsClient {
     }
 
     @Override
+    public String addJobToView(JenkinsServer jenkinsServer, String jobName, String view) {
+        return null;
+    }
+
+    @Override
     public void stopJob(JenkinsServer jenkinsServer, String jobName, Integer buildNumber) {
         try {
             JobWithDetails jobWithDetails = jenkinsServer.getJob(jobName);
@@ -94,15 +96,14 @@ public class JenkinsClientImpl implements JenkinsClient {
     }
 
 
-
     @Override
-    public void deleteJob(JenkinsServer jenkinsServer, String jobName) {
+    public void deleteJob(JenkinsServer jenkinsServer, String jobName, boolean crumbFlag) {
         try {
             JobWithDetails jobWithDetails = jenkinsServer.getJob(jobName);
             if (null == jobWithDetails) {
                 return;
             }
-            jenkinsServer.deleteJob(jobName);
+            jenkinsServer.deleteJob(jobName, crumbFlag);
         } catch (IOException e) {
             log.error("jenkins deleteJob exception", e);
         }
@@ -139,14 +140,17 @@ public class JenkinsClientImpl implements JenkinsClient {
     }
 
     @Override
-    public void tailLog(JenkinsServer jenkinsServer, String jobName, Integer buildNumber, JenkinsLogHandler jenkinsLogHandler) {
+    public void tailLog(JenkinsServer jenkinsServer, String jobName, Integer buildNumber,
+                        JenkinsLogHandler jenkinsLogHandler) {
         try {
-            log.info("JenkinsClientImpl.tailLog ==========start============ jobName:{}, buildNumber:{}", jobName, buildNumber);
+            log.info("JenkinsClientImpl.tailLog ==========start============ jobName:{}, buildNumber:{}", jobName,
+                    buildNumber);
             Build build = jenkinsServer.getJob(jobName).getBuildByNumber(buildNumber);
             if (null == build) {
                 for (int i = 0; i < 300; i++) {
                     try {
-                        log.info("JenkinsClientImpl.tailLog ==========sleep============ jobName:{}, buildNumber:{}, i : {}", jobName, buildNumber, i);
+                        log.info("JenkinsClientImpl.tailLog ==========sleep============ jobName:{}, buildNumber:{}, i" +
+                                " : {}", jobName, buildNumber, i);
                         Thread.sleep(1000);
                         build = jenkinsServer.getJob(jobName).getBuildByNumber(buildNumber);
                         if (null != build) {
@@ -158,7 +162,8 @@ public class JenkinsClientImpl implements JenkinsClient {
                 }
             }
             if (null == build) {
-                log.error("JenkinsClientImpl.tailLog ====================== build is null jobName:{}, buildNumber:{}", jobName, buildNumber);
+                log.error("JenkinsClientImpl.tailLog ====================== build is null jobName:{}, buildNumber:{}"
+                        , jobName, buildNumber);
                 jenkinsLogHandler.finished(jobName, buildNumber, BuildResult.CANCELLED);
                 return;
             }
@@ -180,25 +185,26 @@ public class JenkinsClientImpl implements JenkinsClient {
                 }
             }, 1, 30 * 60);
         } catch (Exception e) {
-            log.error("JenkinsClientImpl.tailLog ================== jobName:{}, buildNumber:{} , exception : {}", jobName, buildNumber, e);
+            log.error("JenkinsClientImpl.tailLog ================== jobName:{}, buildNumber:{} , exception : {}",
+                    jobName, buildNumber, e);
         }
     }
 
     @Override
-    public Boolean checkLastBuildIsCompiling(JenkinsServer jenkinsServer,String jobName) {
+    public Boolean checkLastBuildIsCompiling(JenkinsServer jenkinsServer, String jobName) {
 
         try {
             JobWithDetails job = jenkinsServer.getJob(jobName);
 
-            if(job == null){
+            if (job == null) {
                 return false;
             }
             Build lastBuild = job.getLastBuild();
 
-            if(lastBuild == null){
+            if (lastBuild == null) {
                 return false;
             }
-            if(lastBuild.details().isBuilding()){
+            if (lastBuild.details().isBuilding()) {
                 return true;
             }
         } catch (IOException e) {
@@ -207,7 +213,6 @@ public class JenkinsClientImpl implements JenkinsClient {
 
         return false;
     }
-
 
 
     @Override
@@ -222,7 +227,8 @@ public class JenkinsClientImpl implements JenkinsClient {
                         String log = build.details().getConsoleOutputText();
                         if (!"".equals(log)) {
                             if (log.indexOf(PREFIX_MARK) > 0 && log.indexOf(SUFFIX_MARK) > 0) {
-                                url.append(log.substring(log.indexOf(PREFIX_MARK) + PREFIX_MARK.length() + 1, log.indexOf(SUFFIX_MARK) - 2));
+                                url.append(log.substring(log.indexOf(PREFIX_MARK) + PREFIX_MARK.length() + 1,
+                                        log.indexOf(SUFFIX_MARK) - 2));
                                 if (url.length() > 0) {
                                     return url.toString();
                                 }

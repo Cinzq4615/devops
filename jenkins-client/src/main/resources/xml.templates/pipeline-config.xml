@@ -1,0 +1,124 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.40">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.7.2"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.7.2">
+      <jobProperties/>
+      <triggers/>
+      <parameters/>
+      <options/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>30</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>APOLLO_META</name>
+          <description>Apollo MetaServer </description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>http://conf-meta-test.xiniunet.com:8009</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>TAG</name>
+          <description></description>
+          <defaultValue>1.0</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>GIT_URL</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>http://gitlab.xiniunet.com/crm/web-wechat.git</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>BRANCH</name>
+          <description></description>
+          <defaultValue>master</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>ENV</name>
+          <description>发布的环境</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>test</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>REPOSITORY</name>
+          <description></description>
+          <defaultValue>192.168.20.200:50000</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>TYPE</name>
+          <description></description>
+          <defaultValue>jetty</defaultValue>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.87">
+    <script>
+node {
+            stage (&quot;git stage&quot;) {
+            echo &apos;==== git pull start ====&apos;
+            echo &apos;||&apos;
+            git credentialsId: &apos;1be5a580-ed7f-42bf-b3fb-c1d70c648a4d&apos;, url: params.GIT_URL
+            if (params.BRANCH) {
+                env.check_to=params.BRANCH
+            } else {
+                env.check_to=params.TAG
+            }
+            sh &apos;[ -n &quot;${check_to}&quot; ] &amp;&amp;  git checkout ${check_to} ||  { echo -e &quot;切换至指定BRANCH或者TAG的版本，check：${check_to} 不存在或为空，请检查输入的BRANCH和TAG!&quot; &amp;&amp; exit 111; }&apos;
+            echo &apos;||&apos;
+            echo &apos;==== git pull end   ====&apos;
+            }
+            stage (&quot;mvn build stage&quot;) {
+            echo &apos;==== mvn package begin ====&apos;
+            echo &apos;||&apos;
+            sh &apos;mvn clean package -Dmaven.test.skip=true -U -T 1C&apos;
+            sh &apos;pwd&apos;
+            env.pkg_name=readMavenPom().getArtifactId() + &apos;-&apos; + readMavenPom().getVersion() + &apos;.&apos; + readMavenPom().getPackaging()
+            echo env.pkg_name
+            echo &apos;||&apos;
+            echo &apos;==== mvn package  end   ====&apos;
+            }
+            stage (&quot;docker build and push stage&quot;) {
+            echo &apos;==== docker build and push begin ====&apos;
+            env.project_type=params.TYPE
+            env.image_repository=params.REPOSITORY
+            env.version=readMavenPom().getVersion()
+            env.artifact_id=readMavenPom().getArtifactId()
+            sh &apos;mv ./target/&quot;${pkg_name}&quot; /root/data/jenkins/docker/&quot;${project_type}&quot;/root.war&apos;
+            sh &apos;pwd&apos;
+            echo env.project_type
+            echo env.image_repository
+            sh &apos;echo ${project_type}&apos;
+            sh &apos;cd /root/data/jenkins/docker/${project_type} &amp;&amp; pwd &amp;&amp; docker build -t ${image_repository}/business/${artifact_id}:${version}-$(date &quot;+%Y%m%d%H%M%S&quot;) --build-arg BASE_IMAGE=${image_repository}/base/jetty:9.3.23-jdk_1.8.0_251 .&apos;
+            sh &apos;pwd&apos;
+            }
+}</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
