@@ -1,4 +1,4 @@
 #说明
 ##环境区分
-* 生产环境使用tag发放
-* 其他环境是branch发布
+* prod、pre环境使用tag发放
+* test、dev、daily环境是branch发布

@@ -19,7 +19,7 @@
           <description>Apollo MetaServer </description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
-              <string>http://conf-meta-test.xiniunet.com:8009</string>
+              <string>http://conf-meta-daily.xiniunet.com:8007</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
@@ -28,7 +28,7 @@
           <description>发布的环境</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
-              <string>test</string>
+              <string>daily</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
@@ -36,25 +36,25 @@
           <name>REPOSITORY</name>
           <description>镜像仓库</description>
           <defaultValue>192.168.20.200:50000</defaultValue>
-          <trim>false</trim>
+          <trim>true</trim>
         </hudson.model.TextParameterDefinition>
         <hudson.model.TextParameterDefinition>
           <name>TYPE</name>
           <description></description>
-          <defaultValue>jdk</defaultValue>
-          <trim>false</trim>
+          <defaultValue>jetty</defaultValue>
+          <trim>true</trim>
         </hudson.model.TextParameterDefinition>
         <hudson.model.TextParameterDefinition>
           <name>MODULE</name>
           <description>需要发布的模块,为空发布当前项目</description>
-          <defaultValue>master-business</defaultValue>
-          <trim>false</trim>
+          <defaultValue></defaultValue>
+          <trim>true</trim>
         </hudson.model.TextParameterDefinition>
         <hudson.model.TextParameterDefinition>
           <name>GIT_URL</name>
           <description>Git地址</description>
-          <defaultValue>http://gitlab.xiniunet.com/rd/master.git</defaultValue>
-          <trim>false</trim>
+          <defaultValue>http://gitlab.xiniunet.com/crm/web-wechat.git</defaultValue>
+          <trim>true</trim>
         </hudson.model.TextParameterDefinition>
         <com.cloudbees.plugins.credentials.CredentialsParameterDefinition plugin="credentials@2.3.14">
           <name>GIT_CREADENTIAL</name>
@@ -65,16 +65,16 @@
         </com.cloudbees.plugins.credentials.CredentialsParameterDefinition>
         <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@0.9.13">
           <name>BRANCH_OR_TAG</name>
-          <description>分支</description>
-          <uuid>1a5d92d2-b0c0-484d-b1ce-dadee781bfc5</uuid>
-          <type>PT_BRANCH</type>
+          <description>标签</description>
+          <uuid>361ccae7-22bf-418a-8926-d3422d9508d4</uuid>
+          <type>PT_TAG</type>
           <branch></branch>
           <tagFilter>*</tagFilter>
           <branchFilter>.*</branchFilter>
           <sortMode>NONE</sortMode>
           <defaultValue>origin/master</defaultValue>
           <selectedValue>NONE</selectedValue>
-          <useRepository>http://gitlab.xiniunet.com/rd/master.git</useRepository>
+          <useRepository>http://gitlab.xiniunet.com/c/c-web.git</useRepository>
           <quickFilterEnabled>true</quickFilterEnabled>
           <listSize>5</listSize>
         </net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition>
@@ -124,13 +124,13 @@
           <name>HOST</name>
           <description>访问服务域名</description>
           <defaultValue></defaultValue>
-          <trim>false</trim>
+          <trim>true</trim>
         </hudson.model.TextParameterDefinition>
         <hudson.model.TextParameterDefinition>
           <name>INGRESS_ENABLED</name>
           <description>是否通过网关暴露服务</description>
-          <defaultValue>false</defaultValue>
-          <trim>false</trim>
+          <defaultValue>true</defaultValue>
+          <trim>true</trim>
         </hudson.model.TextParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>ENABLED_20880</name>
@@ -141,7 +141,7 @@
         <hudson.model.StringParameterDefinition>
           <name>ENABLED_80</name>
           <description>是否监听80端口</description>
-          <defaultValue>false</defaultValue>
+          <defaultValue>true</defaultValue>
           <trim>true</trim>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
@@ -228,7 +228,7 @@ node {
         env.release_name=env.pkg_name.toLowerCase()
         env.apollo_meta=params.APOLLO_META
         env.version=pom.version
-        env.release_namespace=params.NAMESPACE
+        env.namespace=params.NAMESPACE
         env.java_options=getJavaOptions()
         env.image_suffix = createImageSuffix()
         env.image_tag = env.version + &apos;-&apos; + env.image_suffix
@@ -263,13 +263,13 @@ node {
     }
     stage (&quot;k8s helm stage&quot;) {
         //更新helm repo
-        //sh &apos;helm repo update&apos;
+        sh &apos;helm repo update&apos;
         def install_status = sh (
             script: &quot;&quot;&quot;
                 helm install ${release_name} xiniu-charts/app \
                 --kubeconfig /root/data/jenkins/k8s/${publish_to}/config \
-                --namespace ${release_namespace} \
-                --set namespace=${release_namespace} \
+                --namespace ${namespace} \
+                --set namespace=${namespace} \
                 --set type=${project_type} \
                 --set replicaCount=${replica_count} \
                 --set image.repository=${project_repository} \
@@ -296,8 +296,8 @@ node {
                 script: &quot;&quot;&quot;
                     helm upgrade ${release_name} xiniu-charts/app \
                     --kubeconfig /root/data/jenkins/k8s/${publish_to}/config \
-                    --namespace ${release_namespace} \
-                    --set namespace=${release_namespace} \
+                    --namespace ${namespace} \
+                    --set namespace=${namespace} \
                     --set type=${project_type} \
                     --set replicaCount=${replica_count} \
                     --set image.repository=${project_repository} \
@@ -320,54 +320,6 @@ node {
         } 
         echo &apos;==== helm stage end ====&apos;
     }
-    
-    stage (&quot;monitor service status stage&quot;) {
-    echo &apos;==== monitor service status stage start ====&apos;
-    echo &quot;服务启动30s后开始获取服务状态\n&quot;
-    echo &quot;每隔10s获取一次pod状态最多循环30次。监听5分钟内的服务状态（如果服务启动时间超过5分钟则从jenkins确认服务状态是不准确的）\n&quot;
-    echo &quot;count循环次数\n&quot;
-    echo &quot;count_total pod 个数\n&quot;
-    echo &quot;count_running 就绪状态的pod个数\n&quot;
-    echo &quot;count_crash 挂掉的pod个数\n&quot;
-    echo &quot;count_crash==count_total 服务启动有问题\n&quot;
-    echo &quot;count_running==count_total 服务启动正常\n&quot;
-    echo &quot;5分钟后count_running&lt;&gt;count_total 服务启动有问题\n&quot;
-	//30s后开始监听服务状态
-	sh &apos;sleep 30s&apos;
-	sh &apos;&apos;&apos;#!/bin/bash
-	    echo &quot;获取当前项目pod状态命令:kubectl get pods --kubeconfig=&quot;/root/data/jenkins/k8s/${publish_to}/config&quot; -n ${release_namespace} | grep ${release_name}\n&quot;
-        count=0
-		count_total=0
-		count_running=0
-		count_crash=0
-		while ( [ ${count} -lt 30 ] );do
-		   sleep 10s
-		   count_total=`kubectl get pods --kubeconfig=&quot;/root/data/jenkins/k8s/${publish_to}/config&quot; -n ${release_namespace} | grep ${release_name} | wc -l`
-		   count_crash=`kubectl get pods --kubeconfig=&quot;/root/data/jenkins/k8s/${publish_to}/config&quot; -n ${release_namespace} | grep ${release_name} | grep CrashLoopBackOff | wc -l`
-		   count_running=`kubectl get pods --kubeconfig=&quot;/root/data/jenkins/k8s/${publish_to}/config&quot; -n ${release_namespace} | grep ${release_name} | grep Running | grep &apos;1/1&apos; | wc -l`
-		   
-		   echo -e &quot;count=${count} \n count_total=${count_total} \n count_running=${count_running} \n count_crash=${count_crash} \n &quot;
-		   
-		   if ([ ${count_total} -eq ${count_crash} ] &amp;&amp; [ ${count_crash} -gt 0 ]);then
-		       echo &quot;发布失败,请查看服务日志,排查失败原因!&quot;
-		       break
-		   fi
-		   
-		   
-
-           if ([ ${count_total} -eq ${count_running} ] &amp;&amp; [ $count_total -gt 0 ]);then
-		   	    echo &quot;发布成功!&quot;
-		   	    break
-		   fi
-		   count=$[${count}+1]
-		   sleep 10s
-		done
-		if [ ${count} -gt 30 ];then
-		    echo &quot;发布失败,请查看服务日志,排查失败原因!&quot;
-		fi
-		&apos;&apos;&apos;
-	    echo &apos;==== monitor service status stage end ====&apos;
-	}
     
     //clear up our workspace
     cleanWs cleanWhenFailure: false, cleanWhenNotBuilt: false, cleanWhenUnstable: false

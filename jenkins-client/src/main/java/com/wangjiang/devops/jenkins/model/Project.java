@@ -50,9 +50,9 @@ public class Project {
     private String group;
 
     /**
-     * 代码在哪个namespace下
+     * 代码在哪个group下
      */
-    private String gitNamespace;
+    private String gitGroup;
 
     /**
      * 项目标识

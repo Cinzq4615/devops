@@ -204,6 +204,38 @@ public class ClientTest {
     }
 
     /**
+     * 生成 dev1 环境 jenkins job
+     */
+    @Test
+    public void GenerateDev1JobConfig() throws  IOException, URISyntaxException  {
+        JenkinsServer jenkinsServer = new JenkinsServer(new URI(jenkinsConfig.getUrl()), jenkinsConfig.getUsername(), jenkinsConfig.getPassword());
+
+        EnvVO envVO = new EnvVO();
+        envVO.setApolloMeta("http://apollo-dev1.xiniunet.com");
+        envVO.setMark("dev1");
+        envVO.setNamespace("xiniunet");
+        envVO.setRepository("harbor-dev1.xiniunet.com");
+        List<ProjectVO> projectVOList =  projectService.getProjects(envVO);
+        projectVOList.forEach(projectVO -> {
+            String jobxml = Dom4jUtil.generateJobConfig(envVO,projectVO);
+            String jobName = String.format("%s-%s",projectVO.getGroup(),projectVO.getMark());
+            Long buidId = jenkinsClient.createJob(jenkinsServer, jobxml, JOB_TYPE, jobName);
+
+            JenkinsHttpClient jenkinsHttpClient = null;
+            try {
+                jenkinsHttpClient = new JenkinsHttpClient(new URI(jenkinsConfig.getUrl()), jenkinsConfig.getUsername(), jenkinsConfig.getPassword());
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+            try {
+                jenkinsHttpClient.post(String.format(jenkinsConfig.getViewUrl(),envVO.getMark(), jobName),true);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    /**
      * getProjects
      */
     @Test

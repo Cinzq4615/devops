@@ -17,7 +17,7 @@ public interface ProjectMapper {
     @Results(
            value = {
                    @Result(property = "typeName", column = "type_name"),
-                   @Result(property = "gitNamespace", column = "git_namespace")
+                   @Result(property = "gitGroup", column = "git_group")
            }
     )
     List<Project> findAll();

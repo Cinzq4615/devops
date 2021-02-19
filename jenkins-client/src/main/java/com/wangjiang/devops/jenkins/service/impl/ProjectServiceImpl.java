@@ -39,14 +39,14 @@ public class ProjectServiceImpl implements ProjectService {
                     ProjectVO projectVO = new ProjectVO();
                     projectVO.setType(project.getType());
                     projectVO.setMark(project.getMark());
-                    projectVO.setGroup(project.getGitNamespace());
-                    projectVO.setGitUrl(String.format(GIT_URL_TEMPLATE,project.getGitNamespace(),project.getMark()));
+                    projectVO.setGroup(project.getGitGroup());
+                    projectVO.setGitUrl(String.format(GIT_URL_TEMPLATE,project.getGitGroup(),project.getMark()));
                     if(PORT_80.equals(project.getPorts().trim())){
                         projectVO.setEnabled80("true");
                         projectVO.setEnabled20880("false");
                         projectVO.setIngressEnabled("true");
                         if(StringUtils.isNotEmpty(project.getDescription())) {
-                            projectVO.setHost(String.format("%s-%s.xiniunet.com", project.getDescription().split("\\.")[0], envVO.getMark()));
+                            projectVO.setHost(String.format("%s-%s.xiniunet.com", project.getHost().split("\\.")[0], envVO.getMark()));
                         }
                     }else if(PORT_20880.equals(project.getPorts().trim())){
                         projectVO.setEnabled80("false");

@@ -36,8 +36,8 @@ public class JenkinsClientImpl implements JenkinsClient {
                     jenkinsServer.createJob(jobName, jobXml, true);
                 } else {
                     System.out.println("job已经存在！");
-                    //deleteJob(jenkinsServer, jobName, true);
-                    //jenkinsServer.createJob(jobName, jobXml, true);
+                    deleteJob(jenkinsServer, jobName, true);
+                    jenkinsServer.createJob(jobName, jobXml, true);
 
                 }
                 //获取jenkins应用 build
