@@ -15,7 +15,6 @@ package com.wangjiang.devops.jenkins.model;
 
 
 import lombok.Data;
-import org.apache.ibatis.type.Alias;
 
 /**
  * 项目表实体对象.
@@ -59,10 +58,6 @@ public class Project {
      */
     private String mark;
 
-    /**
-     * 项目描述
-     */
-    private String description;
 
     /**
      * 项目类型

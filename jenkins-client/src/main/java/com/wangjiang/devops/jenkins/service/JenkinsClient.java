@@ -5,6 +5,8 @@ import com.offbytwo.jenkins.model.Build;
 import com.offbytwo.jenkins.model.JobWithDetails;
 import com.wangjiang.devops.jenkins.intf.JenkinsLogHandler;
 
+import java.util.Map;
+
 /**
  * @author zhangwei
  * @create 2018-05-03 9:55
@@ -22,6 +24,8 @@ public interface JenkinsClient {
 
 
     Build getJobBuild(JenkinsServer jenkinsServer, String jobName, Integer buildNumber);
+
+    void build(JenkinsServer jenkinsServer, String jobName, Map<String,String> parms);
 
     String addJobToView(JenkinsServer jenkinsServer, String jobName, String view);
 

@@ -45,7 +45,7 @@ public class ProjectServiceImpl implements ProjectService {
                         projectVO.setEnabled80("true");
                         projectVO.setEnabled20880("false");
                         projectVO.setIngressEnabled("true");
-                        if(StringUtils.isNotEmpty(project.getDescription())) {
+                        if(StringUtils.isNotEmpty(project.getHost())) {
                             projectVO.setHost(String.format("%s-%s.xiniunet.com", project.getHost().split("\\.")[0], envVO.getMark()));
                         }
                     }else if(PORT_20880.equals(project.getPorts().trim())){
@@ -57,8 +57,8 @@ public class ProjectServiceImpl implements ProjectService {
                         projectVO.setEnabled80("true");
                         projectVO.setEnabled20880("true");
                         projectVO.setIngressEnabled("true");
-                        if(StringUtils.isNotEmpty(project.getDescription())) {
-                            projectVO.setHost(String.format("%s-%s.xiniunet.com", project.getDescription().split("\\.")[0], envVO.getMark()));
+                        if(StringUtils.isNotEmpty(project.getHost())) {
+                            projectVO.setHost(String.format("%s-%s.xiniunet.com", project.getHost().split("\\.")[0], envVO.getMark()));
                         }
                     }
                     projectVOS.add(projectVO);

@@ -1,8 +1,8 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <flow-definition plugin="workflow-job@2.40">
   <actions>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.8.4"/>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.8.4">
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.7.2"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.7.2">
       <jobProperties/>
       <triggers/>
       <parameters/>
@@ -12,14 +12,6 @@
   <description></description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <jenkins.model.BuildDiscarderProperty>
-      <strategy class="hudson.tasks.LogRotator">
-        <daysToKeep>30</daysToKeep>
-        <numToKeep>10</numToKeep>
-        <artifactDaysToKeep>-1</artifactDaysToKeep>
-        <artifactNumToKeep>-1</artifactNumToKeep>
-      </strategy>
-    </jenkins.model.BuildDiscarderProperty>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.ChoiceParameterDefinition>
@@ -27,7 +19,7 @@
           <description>Apollo MetaServer </description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
-              <string>http://apollo-dev1.xiniunet.com</string>
+              <string>http://conf-meta-test.xiniunet.com:8009</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
@@ -36,14 +28,14 @@
           <description>发布的环境</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
-              <string>dev1</string>
+              <string>test</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.TextParameterDefinition>
           <name>REPOSITORY</name>
           <description>镜像仓库</description>
-          <defaultValue>harbor-dev1.xiniunet.com</defaultValue>
+          <defaultValue>192.168.20.200:50000</defaultValue>
           <trim>false</trim>
         </hudson.model.TextParameterDefinition>
         <hudson.model.TextParameterDefinition>
@@ -55,7 +47,7 @@
         <hudson.model.TextParameterDefinition>
           <name>MODULE</name>
           <description>需要发布的模块,为空发布当前项目</description>
-          <defaultValue></defaultValue>
+          <defaultValue>master-business</defaultValue>
           <trim>false</trim>
         </hudson.model.TextParameterDefinition>
         <hudson.model.TextParameterDefinition>
@@ -64,17 +56,17 @@
           <defaultValue>http://gitlab.xiniunet.com/rd/master.git</defaultValue>
           <trim>false</trim>
         </hudson.model.TextParameterDefinition>
-        <com.cloudbees.plugins.credentials.CredentialsParameterDefinition plugin="credentials@2.3.15">
+        <com.cloudbees.plugins.credentials.CredentialsParameterDefinition plugin="credentials@2.3.14">
           <name>GIT_CREADENTIAL</name>
           <description>Git 凭据</description>
-          <defaultValue>64f9d1cf-2de8-4398-b828-1a1654adaa13</defaultValue>
+          <defaultValue>1be5a580-ed7f-42bf-b3fb-c1d70c648a4d</defaultValue>
           <credentialType>com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl</credentialType>
           <required>true</required>
         </com.cloudbees.plugins.credentials.CredentialsParameterDefinition>
         <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@0.9.13">
           <name>BRANCH_OR_TAG</name>
           <description>分支</description>
-          <uuid>e71766dd-6832-48f8-a1c1-bc07dcfab2b4</uuid>
+          <uuid>1a5d92d2-b0c0-484d-b1ce-dadee781bfc5</uuid>
           <type>PT_BRANCH</type>
           <branch></branch>
           <tagFilter>*</tagFilter>
@@ -154,8 +146,16 @@
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>30</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
   </properties>
-  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.89">
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.87">
     <script>def createImageSuffix() {
     // 定义一个版本号作为当次构建的版本，输出结果 201912_69
     return new Date().format(&apos;yyyyMMdd&apos;) + &quot;-${env.BUILD_ID}&quot;
@@ -178,6 +178,7 @@ def getJavaOptions() {
     String javaOptions =&apos;&quot; -server -Xms&apos; + jvmMemory  + &apos;m -Xmx&apos; + jvmMemory + &apos;m -XX:+UseG1GC &quot;&apos;
     return javaOptions
 }
+
 node {
     
     stage (&quot;prepare git stage&quot;) {
@@ -256,13 +257,9 @@ node {
         }         
         sh &apos;docker push ${project_repository}:${image_tag}&apos;
         echo &apos;==== docker build and push end   ====&apos;
-        echo &apos;==== rm -f root.war app.jar  start  ====&apos;
+        echo &apos;==== rm -f root.war  start  ====&apos;
         sh &apos;rm -rf /root/data/jenkins/docker/${project_type}/root.war&apos;
-        sh &apos;rm -rf /root/data/jenkins/docker/${project_type}/app.jar&apos;
-        echo &apos;==== rm -f root.war app.jar  end   ====&apos;
-        echo &apos;==== clear image start ====&apos;
-        sh &apos;docker rmi ${project_repository}:${image_tag}&apos;
-        echo &apos;==== clear image start  end   ====&apos;
+        echo &apos;==== rm -f root.war  end   ====&apos;
     }
     stage (&quot;k8s helm stage&quot;) {
         //更新helm repo
@@ -337,9 +334,7 @@ node {
     echo &quot;5分钟后count_running&lt;&gt;count_total 服务启动有问题\n&quot;
 	//30s后开始监听服务状态
 	sh &apos;sleep 30s&apos;
-	def server_status =sh(
-	script: &apos;&apos;&apos;
-	    #!/bin/bash
+	sh &apos;&apos;&apos;#!/bin/bash
 	    echo &quot;获取当前项目pod状态命令:kubectl get pods --kubeconfig=&quot;/root/data/jenkins/k8s/${publish_to}/config&quot; -n ${release_namespace} | grep ${release_name}\n&quot;
         count=0
 		count_total=0
@@ -347,42 +342,31 @@ node {
 		count_crash=0
 		while ( [ ${count} -lt 30 ] );do
 		   sleep 10s
-		   count_total=`kubectl get pods --kubeconfig=&quot;/root/data/jenkins/k8s/${publish_to}/config&quot; -n ${release_namespace} | grep ${release_name}-app | wc -l`
-		   count_crash=`kubectl get pods --kubeconfig=&quot;/root/data/jenkins/k8s/${publish_to}/config&quot; -n ${release_namespace} | grep ${release_name}-app | grep CrashLoopBackOff | wc -l`
-		   count_running=`kubectl get pods --kubeconfig=&quot;/root/data/jenkins/k8s/${publish_to}/config&quot; -n ${release_namespace} | grep ${release_name}-app | grep Running | grep &apos;1/1&apos; | wc -l`
+		   count_total=`kubectl get pods --kubeconfig=&quot;/root/data/jenkins/k8s/${publish_to}/config&quot; -n ${release_namespace} | grep ${release_name} | wc -l`
+		   count_crash=`kubectl get pods --kubeconfig=&quot;/root/data/jenkins/k8s/${publish_to}/config&quot; -n ${release_namespace} | grep ${release_name} | grep CrashLoopBackOff | wc -l`
+		   count_running=`kubectl get pods --kubeconfig=&quot;/root/data/jenkins/k8s/${publish_to}/config&quot; -n ${release_namespace} | grep ${release_name} | grep Running | grep &apos;1/1&apos; | wc -l`
 		   
 		   echo -e &quot;count=${count} \n count_total=${count_total} \n count_running=${count_running} \n count_crash=${count_crash} \n &quot;
 		   
 		   if ([ ${count_total} -eq ${count_crash} ] &amp;&amp; [ ${count_crash} -gt 0 ]);then
-               exit 1
+		       echo &quot;发布失败,请查看服务日志,排查失败原因!&quot;
 		       break
 		   fi
 		   
 		   
 
            if ([ ${count_total} -eq ${count_running} ] &amp;&amp; [ $count_total -gt 0 ]);then
-                exit 0
+		   	    echo &quot;发布成功!&quot;
 		   	    break
 		   fi
 		   count=$[${count}+1]
 		   sleep 10s
 		done
 		if [ ${count} -eq 30 ];then
-           exit 1
+		    echo &quot;发布失败,请查看服务日志,排查失败原因!&quot;
+            exit
 		fi
 		&apos;&apos;&apos;
-		,returnStatus: true
-		)
-		if(server_status!=0){
-		    ansiColor(&apos;xterm&apos;) {
-              echo &quot;\033[31m 发布失败,请查看服务日志,排查失败原因! \033[0m&quot;
-            }
-            currentBuild.result = &apos;FAILURE&apos;
-		}else{
-		    ansiColor(&apos;xterm&apos;) {
-              echo &quot;\033[32m 发布成功! \033[0m&quot;
-            }
-		}
 	    echo &apos;==== monitor service status stage end ====&apos;
 	}
     

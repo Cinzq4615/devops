@@ -18,4 +18,7 @@ public class EnvVO {
     //默认发布空间
     private String namespace;
 
+    //git 凭据
+    private String gitCreadential;
+
 }

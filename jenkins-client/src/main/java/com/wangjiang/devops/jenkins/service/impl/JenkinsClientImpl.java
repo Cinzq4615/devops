@@ -1,5 +1,6 @@
 package com.wangjiang.devops.jenkins.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.offbytwo.jenkins.JenkinsServer;
 import com.offbytwo.jenkins.helper.BuildConsoleStreamListener;
 import com.offbytwo.jenkins.model.*;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author zhangwei
@@ -35,17 +37,17 @@ public class JenkinsClientImpl implements JenkinsClient {
                     //jenkins 创建应用
                     jenkinsServer.createJob(jobName, jobXml, true);
                 } else {
-                    System.out.println("job已经存在！");
+                    System.out.println(String.format("job: %s 已经存在！",jobName));
                     deleteJob(jenkinsServer, jobName, true);
                     jenkinsServer.createJob(jobName, jobXml, true);
 
                 }
-                //获取jenkins应用 build
-                //jobWithDetails = jenkinsServer.getJob(jobName);
-                //jobWithDetails.build(false);
-                //Integer buildNumber = jobWithDetails.getNextBuildNumber();
-                //log.info("JenkinsClientImpl.createJob ----------- jobName : {}, buildNumber : {}", jobName,
-                // buildNumber);
+//                获取jenkins应用 build
+//                jobWithDetails = jenkinsServer.getJob(jobName);
+//                jobWithDetails.build(false);
+//                Integer buildNumber = jobWithDetails.getNextBuildNumber();
+//                log.info("JenkinsClientImpl.createJob ----------- jobName : {}, buildNumber : {}", jobName,
+//                 buildNumber);
                 return Long.valueOf(1);
             } catch (IOException e) {
                 throw new JenkinsOperateException(e);
@@ -69,6 +71,22 @@ public class JenkinsClientImpl implements JenkinsClient {
             log.error("jenkins getJobBuild exception", e);
         } finally {
             return build;
+        }
+    }
+
+    @Override
+    public void build(JenkinsServer jenkinsServer, String jobName, Map<String,String> parms) {
+        log.info(String.format("job%s:开始构建",jobName));
+        log.info(String.format("构建参数:%s", JSON.toJSONString(parms)));
+        try {
+            JobWithDetails jobWithDetails = jenkinsServer.getJob(jobName);
+            if (null == jobWithDetails) {
+                log.info(String.format("%s:不存在",jobName));
+            }
+            jobWithDetails.build(parms,true);
+
+        } catch (IOException e) {
+            log.error("jenkins build exception", e);
         }
     }
 
