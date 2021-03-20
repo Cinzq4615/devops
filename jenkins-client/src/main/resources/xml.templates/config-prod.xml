@@ -1,8 +1,8 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <flow-definition plugin="workflow-job@2.40">
   <actions>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.7.2"/>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.7.2">
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.8.4"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.8.4">
       <jobProperties/>
       <triggers/>
       <parameters/>
@@ -12,6 +12,14 @@
   <description></description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>30</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.ChoiceParameterDefinition>
@@ -19,7 +27,7 @@
           <description>Apollo MetaServer </description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
-              <string>http://conf-meta-daily.xiniunet.com:8007</string>
+              <string>http://apollo-dev1.xiniunet.com</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
@@ -28,45 +36,45 @@
           <description>发布的环境</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
-              <string>daily</string>
+              <string>dev1</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.TextParameterDefinition>
           <name>REPOSITORY</name>
           <description>镜像仓库</description>
-          <defaultValue>192.168.20.200:50000</defaultValue>
-          <trim>true</trim>
+          <defaultValue>harbor-dev1.xiniunet.com</defaultValue>
+          <trim>false</trim>
         </hudson.model.TextParameterDefinition>
         <hudson.model.TextParameterDefinition>
           <name>TYPE</name>
           <description></description>
           <defaultValue>jetty</defaultValue>
-          <trim>true</trim>
+          <trim>false</trim>
         </hudson.model.TextParameterDefinition>
         <hudson.model.TextParameterDefinition>
           <name>MODULE</name>
           <description>需要发布的模块,为空发布当前项目</description>
           <defaultValue></defaultValue>
-          <trim>true</trim>
+          <trim>false</trim>
         </hudson.model.TextParameterDefinition>
         <hudson.model.TextParameterDefinition>
           <name>GIT_URL</name>
           <description>Git地址</description>
-          <defaultValue>http://gitlab.xiniunet.com/crm/web-wechat.git</defaultValue>
-          <trim>true</trim>
+          <defaultValue>git@gitlab.xiniunet.com:xls/eBusiness-admin.git</defaultValue>
+          <trim>false</trim>
         </hudson.model.TextParameterDefinition>
-        <com.cloudbees.plugins.credentials.CredentialsParameterDefinition plugin="credentials@2.3.14">
+        <com.cloudbees.plugins.credentials.CredentialsParameterDefinition plugin="credentials@2.3.15">
           <name>GIT_CREADENTIAL</name>
           <description>Git 凭据</description>
-          <defaultValue>1be5a580-ed7f-42bf-b3fb-c1d70c648a4d</defaultValue>
-          <credentialType>com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl</credentialType>
+          <defaultValue>934679fd-888d-4c24-9dc3-623ea2c23e83</defaultValue>
+          <credentialType>com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey</credentialType>
           <required>true</required>
         </com.cloudbees.plugins.credentials.CredentialsParameterDefinition>
         <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@0.9.13">
           <name>BRANCH_OR_TAG</name>
           <description>标签</description>
-          <uuid>361ccae7-22bf-418a-8926-d3422d9508d4</uuid>
+          <uuid>7a29a486-1a7e-432f-91f8-4a7b2489fbf1</uuid>
           <type>PT_TAG</type>
           <branch></branch>
           <tagFilter>*</tagFilter>
@@ -74,7 +82,7 @@
           <sortMode>NONE</sortMode>
           <defaultValue>origin/master</defaultValue>
           <selectedValue>NONE</selectedValue>
-          <useRepository>http://gitlab.xiniunet.com/c/c-web.git</useRepository>
+          <useRepository>git@gitlab.xiniunet.com:xls/eBusiness-admin.git</useRepository>
           <quickFilterEnabled>true</quickFilterEnabled>
           <listSize>5</listSize>
         </net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition>
@@ -124,18 +132,18 @@
           <name>HOST</name>
           <description>访问服务域名</description>
           <defaultValue></defaultValue>
-          <trim>true</trim>
+          <trim>false</trim>
         </hudson.model.TextParameterDefinition>
         <hudson.model.TextParameterDefinition>
           <name>INGRESS_ENABLED</name>
           <description>是否通过网关暴露服务</description>
-          <defaultValue>true</defaultValue>
-          <trim>true</trim>
+          <defaultValue>false</defaultValue>
+          <trim>false</trim>
         </hudson.model.TextParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>ENABLED_20880</name>
           <description>是否监听20880端口</description>
-          <defaultValue>true</defaultValue>
+          <defaultValue>false</defaultValue>
           <trim>true</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
@@ -146,20 +154,19 @@
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
-    <jenkins.model.BuildDiscarderProperty>
-      <strategy class="hudson.tasks.LogRotator">
-        <daysToKeep>30</daysToKeep>
-        <numToKeep>10</numToKeep>
-        <artifactDaysToKeep>-1</artifactDaysToKeep>
-        <artifactNumToKeep>-1</artifactNumToKeep>
-      </strategy>
-    </jenkins.model.BuildDiscarderProperty>
   </properties>
-  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.87">
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.89">
     <script>def createImageSuffix() {
     // 定义一个版本号作为当次构建的版本，输出结果 201912_69
     return new Date().format(&apos;yyyyMMdd&apos;) + &quot;-${env.BUILD_ID}&quot;
 }
+
+def getGroup() {
+    // 获取项目所属分支 JOB_NAME 的前缀
+    String jobName = &quot;${env.JOB_NAME}&quot;;
+    return jobName.split(&apos;-&apos;)[1];
+}
+
 def getProbePort() {
     // 根据类型确认容器暴露端口
     if(Boolean.parseBoolean(params.ENABLED_80)){
@@ -174,14 +181,13 @@ def getProbePort() {
 def getJavaOptions() {
     // jvm设置
     int memory = params.MAX_MEMORY;
-    int jvmMemory = memory/2;
+    int jvmMemory = (memory/3)*2;
     String javaOptions =&apos;&quot; -server -Xms&apos; + jvmMemory  + &apos;m -Xmx&apos; + jvmMemory + &apos;m -XX:+UseG1GC &quot;&apos;
     return javaOptions
 }
-
 node {
     
-    stage (&quot;prepare git stage&quot;) {
+    stage (&quot;编译准备&quot;) {
         echo &apos;==== prepare stage start ====&apos;
         if(params.MODULE){
             env.app=params.MODULE
@@ -191,16 +197,23 @@ node {
         env.check_to = params.BRANCH_OR_TAG
         echo &apos;==== prepare stage end ====&apos;
     }
-    stage (&quot;git stage&quot;) {
+    stage (&quot;源码下载&quot;) {
         echo &apos;==== git pull start ====&apos;
-        echo env.image_version
-        echo &apos;||&apos;
-        git credentialsId: params.GIT_CREADENTIAL, url: params.GIT_URL
-        sh &apos;[ -n &quot;${check_to}&quot; ] &amp;&amp;  git checkout ${check_to} ||  { echo -e &quot;切换至指定BRANCH或者TAG的版本，check：${check_to} 不存在或为空，请检查输入的BRANCH和TAG!&quot; &amp;&amp; exit 111; }&apos;
+        //git credentialsId: params.GIT_CREADENTIAL, url: params.GIT_URL
+      checkout([$class: &apos;GitSCM&apos;,
+        branches: [[name: &quot;${check_to}&quot;]],
+        extensions: [[$class: &apos;CloneOption&apos;, timeout: 600]],
+        gitTool: &apos;Default&apos;, 
+        userRemoteConfigs: [[
+            credentialsId: params.GIT_CREADENTIAL,
+            url: params.GIT_URL
+        ]]
+      ])
+        //sh &apos;[ -n &quot;${check_to}&quot; ] &amp;&amp;  git checkout ${check_to} ||  { echo -e &quot;切换至指定BRANCH或者TAG的版本，check：${check_to} 不存在或为空，请检查输入的BRANCH和TAG!&quot; &amp;&amp; exit 111; }&apos;
         echo &apos;||&apos;
         echo &apos;==== git pull end   ====&apos;
         }
-        stage (&quot;mvn build stage&quot;) {
+    stage (&quot;编译打包&quot;) {
         echo &apos;==== mvn package begin ====&apos;
         echo &apos;||&apos;
         sh &apos;cd ${app} &amp;&amp; mvn clean package -Dmaven.test.skip=true -U -T 1C&apos;
@@ -208,7 +221,7 @@ node {
         echo &apos;||&apos;
         echo &apos;==== mvn package  end   ====&apos;
     }
-    stage (&quot;prepare install stage&quot;) {
+    stage (&quot;构建准备&quot;) {
 
         echo &apos;==== prepare install stage start ====&apos;
         //定义全局环境变量   
@@ -228,7 +241,7 @@ node {
         env.release_name=env.pkg_name.toLowerCase()
         env.apollo_meta=params.APOLLO_META
         env.version=pom.version
-        env.namespace=params.NAMESPACE
+        env.release_namespace=params.NAMESPACE
         env.java_options=getJavaOptions()
         env.image_suffix = createImageSuffix()
         env.image_tag = env.version + &apos;-&apos; + env.image_suffix
@@ -238,18 +251,21 @@ node {
         env.enabled_80 = params.ENABLED_80
         env.enabled_20880 = params.ENABLED_20880
         env.probe_port = getProbePort()
+        env.xiniunet_group = getGroup()
         echo &apos;==== prepare install stage end ====&apos;
     }
-    stage (&quot;docker build and push stage&quot;) {
+    stage (&quot;镜像构建&quot;) {
         echo &apos;==== docker build and push begin ====&apos;
         switch(params.TYPE) { 
             case &quot;jetty&quot;: 
-                sh &apos;mv -f ${app}/target/${pkg} /root/data/jenkins/docker/${project_type}/root.war&apos;
-                sh &apos;cd /root/data/jenkins/docker/${project_type} &amp;&amp; docker build -t ${project_repository}:${image_tag} --build-arg IMAGE_REPOSITORY=${image_repository} .&apos;
+                sh &apos;mkdir -p /root/data/jenkins/docker/${project_type}/${release_name}&apos;
+                sh &apos;mv -f ${app}/target/${pkg} /root/data/jenkins/docker/${project_type}/${release_name}/root.war &amp;&amp; cd /root/data/jenkins/docker/${project_type} &amp;&amp;  cp Dockerfile start.sh ${release_name}/&apos;
+                sh &apos;cd /root/data/jenkins/docker/${project_type}/${release_name} &amp;&amp; docker build -t ${project_repository}:${image_tag} --build-arg IMAGE_REPOSITORY=${image_repository} .&apos;
                 break;
             case &quot;jdk&quot;: 
-                sh &apos;mv -f ${app}/target/${pkg} /root/data/jenkins/docker/${project_type}/app.jar&apos;
-                sh &apos;cd /root/data/jenkins/docker/${project_type} &amp;&amp; docker build -t ${project_repository}:${image_tag} --build-arg IMAGE_REPOSITORY=${image_repository} .&apos;
+                sh &apos;mkdir -p /root/data/jenkins/docker/${project_type}/${release_name}&apos;
+                sh &apos;mv -f ${app}/target/${pkg} /root/data/jenkins/docker/${project_type}/${release_name}/app.jar &amp;&amp; cd /root/data/jenkins/docker/${project_type} &amp;&amp;  cp Dockerfile ${release_name}/&apos;
+                sh &apos;cd /root/data/jenkins/docker/${project_type}/${release_name} &amp;&amp; docker build -t ${project_repository}:${image_tag} --build-arg IMAGE_REPOSITORY=${image_repository} .&apos;
                 break;
             default:
                 println(&quot;The type is unknown&quot;); 
@@ -257,19 +273,23 @@ node {
         }         
         sh &apos;docker push ${project_repository}:${image_tag}&apos;
         echo &apos;==== docker build and push end   ====&apos;
-        echo &apos;==== rm -f root.war  start  ====&apos;
-        sh &apos;rm -rf /root/data/jenkins/docker/${project_type}/root.war&apos;
-        echo &apos;==== rm -f root.war  end   ====&apos;
+        echo &apos;==== rm -f root.war app.jar  start  ====&apos;
+        sh &apos;rm -rf /root/data/jenkins/docker/${project_type}/${release_name}/root.war&apos;
+        sh &apos;rm -rf /root/data/jenkins/docker/${project_type}/${release_name}/app.jar&apos;
+        echo &apos;==== rm -f root.war app.jar  end   ====&apos;
+        echo &apos;==== clear image start ====&apos;
+        sh &apos;docker rmi ${project_repository}:${image_tag}&apos;
+        echo &apos;==== clear image start  end   ====&apos;
     }
-    stage (&quot;k8s helm stage&quot;) {
+    stage (&quot;项目发布&quot;) {
         //更新helm repo
         sh &apos;helm repo update&apos;
         def install_status = sh (
             script: &quot;&quot;&quot;
                 helm install ${release_name} xiniu-charts/app \
-                --kubeconfig /root/data/jenkins/k8s/${publish_to}/config \
-                --namespace ${namespace} \
-                --set namespace=${namespace} \
+                --kubeconfig /root/data/jenkins/k8s/config \
+                --namespace ${release_namespace} \
+                --set namespace=${release_namespace} \
                 --set type=${project_type} \
                 --set replicaCount=${replica_count} \
                 --set image.repository=${project_repository} \
@@ -286,7 +306,9 @@ node {
                 --set ingress.hosts[0].host=${host} \
                 --set ports.enabled80=${enabled_80} \
                 --set ports.enabled20880=${enabled_20880} \
-                --set probe.port=${probe_port}
+                --set probe.port=${probe_port} \
+                --set xiniunet.group=${xiniunet_group} \
+                --set kuboard.layer=svc
             &quot;&quot;&quot;,
             returnStatus:true
             )
@@ -295,9 +317,9 @@ node {
             sh (
                 script: &quot;&quot;&quot;
                     helm upgrade ${release_name} xiniu-charts/app \
-                    --kubeconfig /root/data/jenkins/k8s/${publish_to}/config \
-                    --namespace ${namespace} \
-                    --set namespace=${namespace} \
+                    --kubeconfig /root/data/jenkins/k8s/config \
+                    --namespace ${release_namespace} \
+                    --set namespace=${release_namespace} \
                     --set type=${project_type} \
                     --set replicaCount=${replica_count} \
                     --set image.repository=${project_repository} \
@@ -314,12 +336,76 @@ node {
                     --set ingress.hosts[0].host=${host} \
                     --set ports.enabled80=${enabled_80} \
                     --set ports.enabled20880=${enabled_20880} \
-                    --set probe.port=${probe_port}
+                    --set probe.port=${probe_port} \
+                    --set xiniunet.group=${xiniunet_group} \
+                    --set kuboard.layer=svc
                 &quot;&quot;&quot;
             )
         } 
         echo &apos;==== helm stage end ====&apos;
     }
+    
+    stage (&quot;服务启动&quot;) {
+    echo &apos;==== monitor service status stage start ====&apos;
+    echo &quot;服务启动30s后开始获取服务状态\n&quot;
+    echo &quot;每隔10s获取一次pod状态最多循环30次。监听5分钟内的服务状态（如果服务启动时间超过5分钟则从jenkins确认服务状态是不准确的）\n&quot;
+    echo &quot;count循环次数\n&quot;
+    echo &quot;count_total pod 个数\n&quot;
+    echo &quot;count_running 就绪状态的pod个数\n&quot;
+    echo &quot;count_crash 挂掉的pod个数\n&quot;
+    echo &quot;count_crash==count_total 服务启动有问题\n&quot;
+    echo &quot;count_running==count_total 服务启动正常\n&quot;
+    echo &quot;5分钟后count_running&lt;&gt;count_total 服务启动有问题\n&quot;
+	//30s后开始监听服务状态
+	sh &apos;sleep 30s&apos;
+	def server_status =sh(
+	script: &apos;&apos;&apos;
+	    #!/bin/bash
+	    echo &quot;获取当前项目pod状态命令:kubectl get pods --kubeconfig=&quot;/root/data/jenkins/k8s/${publish_to}/config&quot; -n ${release_namespace} | grep ^${release_name}\n&quot;
+        count=0
+		count_total=0
+		count_running=0
+		count_crash=0
+		while ( [ ${count} -lt 30 ] );do
+		   sleep 10s
+		   count_total=`kubectl get pods --kubeconfig=&quot;/root/data/jenkins/k8s/config&quot; -n ${release_namespace} | grep ^${release_name}-app | wc -l`
+		   count_crash=`kubectl get pods --kubeconfig=&quot;/root/data/jenkins/k8s/config&quot; -n ${release_namespace} | grep ^${release_name}-app | grep CrashLoopBackOff | wc -l`
+		   count_running=`kubectl get pods --kubeconfig=&quot;/root/data/jenkins/k8s/config&quot; -n ${release_namespace} | grep ^${release_name}-app | grep Running | grep &apos;1/1&apos; | wc -l`
+		   
+		   echo -e &quot;count=${count} \n count_total=${count_total} \n count_running=${count_running} \n count_crash=${count_crash} \n &quot;
+		   
+		   if ([ ${count_total} -eq ${count_crash} ] &amp;&amp; [ ${count_crash} -gt 0 ]);then
+               exit 1
+		       break
+		   fi
+		   
+		   
+
+           if ([ ${count_total} -eq ${count_running} ] &amp;&amp; [ $count_total -gt 0 ]);then
+                exit 0
+		   	    break
+		   fi
+		   count=$[${count}+1]
+		   sleep 10s
+		done
+		if [ ${count} -eq 30 ];then
+           exit 1
+		fi
+		&apos;&apos;&apos;
+		,returnStatus: true
+		)
+		if(server_status!=0){
+		    ansiColor(&apos;xterm&apos;) {
+              echo &quot;\033[31m 发布失败,请查看服务日志,排查失败原因! \033[0m&quot;
+            }
+            currentBuild.result = &apos;FAILURE&apos;
+		}else{
+		    ansiColor(&apos;xterm&apos;) {
+              echo &quot;\033[32m 发布成功! \033[0m&quot;
+            }
+		}
+	    echo &apos;==== monitor service status stage end ====&apos;
+	}
     
     //clear up our workspace
     cleanWs cleanWhenFailure: false, cleanWhenNotBuilt: false, cleanWhenUnstable: false

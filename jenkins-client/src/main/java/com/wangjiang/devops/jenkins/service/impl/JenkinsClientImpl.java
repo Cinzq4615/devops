@@ -83,7 +83,14 @@ public class JenkinsClientImpl implements JenkinsClient {
             if (null == jobWithDetails) {
                 log.info(String.format("%s:不存在",jobName));
             }
-            jobWithDetails.build(parms,true);
+            Integer buildId=jobWithDetails.getNextBuildNumber();
+            log.info(String.format("项目:%s,buildId=%s",jobName,buildId));
+//            if(buildId>1) {
+//                log.info(String.format("项目已发布!"));
+//            }else{
+//                jobWithDetails.build(parms, true);
+//            }
+            jobWithDetails.build(parms, true);
 
         } catch (IOException e) {
             log.error("jenkins build exception", e);

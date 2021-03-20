@@ -17,6 +17,7 @@ import com.wangjiang.devops.jenkins.vo.JenkinsPipelineVo;
 import com.wangjiang.devops.jenkins.vo.PipeLineStage;
 import com.wangjiang.devops.jenkins.vo.ProjectVO;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,6 +127,17 @@ public class ClientTest {
             //删除 结束
         });
     }
+    @Test
+    public void deleteDev1JobConfig() throws  IOException, URISyntaxException  {
+        JenkinsServer jenkinsServer = new JenkinsServer(new URI(jenkinsConfig.getUrl()), jenkinsConfig.getUsername(), jenkinsConfig.getPassword());
+        String jobs = "sns-pw-sns-admin#xls-pw-npos-admin#xls-pw-cross-admin#crm-pw-member-admin#life-pw-hotel-admin#oa-pw-my-time-admin#rd-pw-console-admin#life-pw-health-admin#education-pw-hr-admin#merck-pw-ticket-admin#life-pw-hospital-admin#oa-pw-attendance-admin#education-pw-exam-admin#education-pw-file-admin#education-pw-flow-admin#rd-pw-integration-admin#sns-pw-customized-admin#xls-pw-supporting-admin#education-pw-exam-online#life-pw-restaurant-admin#life-pw-settlement-admin#education-pw-course-admin#education-pw-survey-admin#xls-pw-distribution-admin#buddhist-pw-buddhist-admin#education-pw-course-online#education-pw-library-admin#education-pw-survey-online#education-pw-dormitory-admin#education-pw-education-admin#rd-pw-potentialpartner-admin#buddhist-pw-appointment-admin#education-pw-collection-admin#education-pw-oa-meeting-admin#education-pw-survey-online-h5#rd-pw-potentialpartner-h5-admin#education-pw-gyfj-dashboard-admin#education-pw-official-document-admin";
+
+        //ArrayList jobList = new ArrayList<>(jobs.split("#"));
+        String []  jobArray = jobs.split("#");
+        for(int i=0;i<jobArray.length;i++){
+            jenkinsClient.deleteJob(jenkinsServer,jobArray[i],true);
+        }
+    }
 
     @Test
     public void deleteTestJobConfig() throws  IOException, URISyntaxException  {
@@ -231,6 +243,95 @@ public class ClientTest {
                 Long buidId = jenkinsClient.createJob(jenkinsServer, jobxml, JOB_TYPE, jobName);
                 Assert.notNull(buidId, "job制作失败");
             }
+        });
+    }
+
+    /**
+     * 生成 dev1 环境 jenkins job
+     */
+    @Test
+    public void GenerateTest1JobConfig() throws  IOException, URISyntaxException  {
+        JenkinsServer jenkinsServer = new JenkinsServer(new URI(jenkinsConfig.getUrl()), jenkinsConfig.getUsername(), jenkinsConfig.getPassword());
+
+        EnvVO envVO = new EnvVO();
+        envVO.setApolloMeta("http://apollo-test1.xiniunet.com");
+        envVO.setMark("test1");
+        envVO.setNamespace("xiniunet");
+        envVO.setRepository("harbor-test1.xiniunet.com");
+        envVO.setGitCreadential("64f9d1cf-2de8-4398-b828-1a1654adaa13");
+        List<ProjectVO> projectVOList =  projectService.getProjects(envVO);
+        projectVOList.forEach(projectVO -> {
+            //if(!"web-svc".equals(projectVO.getMark())&&!"web-my".equals(projectVO.getMark())){
+                String jobxml = Dom4jUtil.generateJobConfig(envVO,projectVO);
+                String jobName = String.format("%s-%s",projectVO.getGroup(),projectVO.getMark());
+                Long buidId = jenkinsClient.createJob(jenkinsServer, jobxml, JOB_TYPE, jobName);
+                Assert.notNull(buidId, "job制作失败");
+            //}
+        });
+    }
+
+
+    /**
+     * 生成 dev1 环境 jenkins job
+     */
+    @Test
+    public void GenerateDev1JobConfigById() throws  IOException, URISyntaxException  {
+
+        Integer id = Integer.valueOf(155);
+        JenkinsServer jenkinsServer = new JenkinsServer(new URI(jenkinsConfig.getUrl()), jenkinsConfig.getUsername(), jenkinsConfig.getPassword());
+
+        EnvVO envVO = new EnvVO();
+        envVO.setApolloMeta("http://apollo-dev1.xiniunet.com");
+        envVO.setMark("dev1");
+        envVO.setNamespace("xiniunet");
+        envVO.setRepository("harbor-dev1.xiniunet.com");
+        envVO.setGitCreadential("64f9d1cf-2de8-4398-b828-1a1654adaa13");
+        List<ProjectVO> projectVOList =  projectService.getProjects(envVO,id);
+        projectVOList.forEach(projectVO -> {
+            if(!"web-svc".equals(projectVO.getMark())&&!"web-my".equals(projectVO.getMark())){
+                String jobxml = Dom4jUtil.generateJobConfig(envVO,projectVO);
+                String jobName = String.format("%s-%s",projectVO.getGroup(),projectVO.getMark());
+                Long buidId = jenkinsClient.createJob(jenkinsServer, jobxml, JOB_TYPE, jobName);
+                Assert.notNull(buidId, "job制作失败");
+            }
+
+//            JenkinsHttpClient jenkinsHttpClient = null;
+//            try {
+//                jenkinsHttpClient = new JenkinsHttpClient(new URI(jenkinsConfig.getUrl()), jenkinsConfig.getUsername(), jenkinsConfig.getPassword());
+//            } catch (URISyntaxException e) {
+//                e.printStackTrace();
+//            }
+//            try {
+//                jenkinsHttpClient.post(String.format(jenkinsConfig.getViewUrl(),envVO.getMark(), jobName),true);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+        });
+    }
+
+    /**
+     * 生成 dev1 环境 jenkins job
+     */
+    @Test
+    public void GenerateTest1JobConfigById() throws  IOException, URISyntaxException  {
+
+        Integer id = Integer.valueOf(155);
+        JenkinsServer jenkinsServer = new JenkinsServer(new URI(jenkinsConfig.getUrl()), jenkinsConfig.getUsername(), jenkinsConfig.getPassword());
+
+        EnvVO envVO = new EnvVO();
+        envVO.setApolloMeta("http://apollo-test1.xiniunet.com");
+        envVO.setMark("test1");
+        envVO.setNamespace("xiniunet");
+        envVO.setRepository("harbor-test1.xiniunet.com");
+        envVO.setGitCreadential("64f9d1cf-2de8-4398-b828-1a1654adaa13");
+        List<ProjectVO> projectVOList =  projectService.getProjects(envVO,id);
+        projectVOList.forEach(projectVO -> {
+            if(!"web-svc".equals(projectVO.getMark())&&!"web-my".equals(projectVO.getMark())){
+                String jobxml = Dom4jUtil.generateJobConfig(envVO,projectVO);
+                String jobName = String.format("%s-%s",projectVO.getGroup(),projectVO.getMark());
+                Long buidId = jenkinsClient.createJob(jenkinsServer, jobxml, JOB_TYPE, jobName);
+                Assert.notNull(buidId, "job制作失败");
+            }
 
 //            JenkinsHttpClient jenkinsHttpClient = null;
 //            try {
@@ -275,6 +376,124 @@ public class ClientTest {
             Map<String,String> prams =  new HashMap<>();
             if(releaseMap.get(projectVO.getMark())!=null){
                 prams.put(NAME_BRANCH_OR_TAG,releaseMap.get(projectVO.getMark()));
+            }
+            jenkinsClient.build(jenkinsServer,jobName,prams);
+        });
+
+//        String jobName = "rd-core";
+//        Map<String,String> prams =  new HashMap<>();
+//        prams.put(NAME_BRANCH_OR_TAG,"origin/hotfix/去除无用引用-1.13.11");
+//        jenkinsClient.build(jenkinsServer,jobName,prams);
+    }
+
+    /**
+     * 发布 test1 环境 jenkins job
+     */
+    @Test
+    public void BuildTest1JdkAndJettyJobConfig() throws  IOException, URISyntaxException  {
+        JenkinsServer jenkinsServer = new JenkinsServer(new URI(jenkinsConfig.getUrl()), jenkinsConfig.getUsername(), jenkinsConfig.getPassword());
+
+        EnvVO envVO = new EnvVO();
+        envVO.setApolloMeta("http://apollo-test1.xiniunet.com");
+        envVO.setMark("test1");
+        envVO.setNamespace("xiniunet");
+        envVO.setRepository("harbor-test1.xiniunet.com");
+        envVO.setGitCreadential("64f9d1cf-2de8-4398-b828-1a1654adaa13");
+
+        //获取发布信息
+        List<ReleaseInfo> releaseInfoList =  releaseInfoService.getReleaseInfos(envVO.getMark());
+        Map<String,String> releaseMap =  new HashMap<>(releaseInfoList.size());
+        if(!CollectionUtils.isEmpty(releaseInfoList)) {
+            releaseInfoList.forEach(info -> {
+                releaseMap.put(info.getProjectMark(), info.getReleaseVersion());
+            });
+        }
+
+        List<ProjectVO> projectVOList =  projectService.getProjects(envVO);
+        projectVOList.forEach(projectVO -> {
+            String jobName = String.format("%s-%s",projectVO.getGroup(),projectVO.getMark());
+            Map<String,String> prams =  new HashMap<>();
+            if(releaseMap.get(projectVO.getMark())!=null){
+                prams.put(NAME_BRANCH_OR_TAG,releaseMap.get(projectVO.getMark()));
+            }
+            jenkinsClient.build(jenkinsServer,jobName,prams);
+        });
+
+//        String jobName = "rd-core";
+//        Map<String,String> prams =  new HashMap<>();
+//        prams.put(NAME_BRANCH_OR_TAG,"origin/hotfix/去除无用引用-1.13.11");
+//        jenkinsClient.build(jenkinsServer,jobName,prams);
+    }
+
+
+    /**
+     * 发布 dev1 环境 jenkins job
+     */
+    @Test
+    public void BuildDev1NginxJobConfig() throws  IOException, URISyntaxException  {
+        JenkinsServer jenkinsServer = new JenkinsServer(new URI(jenkinsConfig.getUrl()), jenkinsConfig.getUsername(), jenkinsConfig.getPassword());
+
+        EnvVO envVO = new EnvVO();
+        envVO.setApolloMeta("http://apollo-dev1.xiniunet.com");
+        envVO.setMark("dev1");
+        envVO.setNamespace("xiniunet");
+        envVO.setRepository("harbor-dev1.xiniunet.com");
+        envVO.setGitCreadential("64f9d1cf-2de8-4398-b828-1a1654adaa13");
+
+        //获取发布信息
+        List<ReleaseInfo> releaseInfoList =  releaseInfoService.getReleaseInfos(envVO.getMark());
+        Map<String,String> releaseMap =  new HashMap<>(releaseInfoList.size());
+        if(!CollectionUtils.isEmpty(releaseInfoList)) {
+            releaseInfoList.forEach(info -> {
+                releaseMap.put(info.getProjectMark(), info.getReleaseVersion());
+            });
+        }
+
+        List<ProjectVO> projectVOList =  projectService.getProjects(envVO,"nginx");
+        projectVOList.forEach(projectVO -> {
+            String jobName = String.format("%s-%s",projectVO.getGroup(),projectVO.getMark());
+            Map<String,String> prams =  new HashMap<>();
+            if(releaseMap.get(projectVO.getMark())!=null){
+                prams.put("git_branch",releaseMap.get(projectVO.getMark()));
+            }
+            jenkinsClient.build(jenkinsServer,jobName,prams);
+        });
+
+//        String jobName = "rd-core";
+//        Map<String,String> prams =  new HashMap<>();
+//        prams.put(NAME_BRANCH_OR_TAG,"origin/hotfix/去除无用引用-1.13.11");
+//        jenkinsClient.build(jenkinsServer,jobName,prams);
+    }
+
+    /**
+     * 发布 dev1 环境 jenkins job
+     */
+    @Test
+    public void BuildTest1NginxJobConfig() throws  IOException, URISyntaxException  {
+        JenkinsServer jenkinsServer = new JenkinsServer(new URI(jenkinsConfig.getUrl()), jenkinsConfig.getUsername(), jenkinsConfig.getPassword());
+
+        EnvVO envVO = new EnvVO();
+        envVO.setApolloMeta("http://apollo-test1.xiniunet.com");
+        envVO.setMark("test1");
+        envVO.setNamespace("xiniunet");
+        envVO.setRepository("harbor-test1.xiniunet.com");
+        envVO.setGitCreadential("64f9d1cf-2de8-4398-b828-1a1654adaa13");
+
+        //获取发布信息
+        List<ReleaseInfo> releaseInfoList =  releaseInfoService.getReleaseInfos(envVO.getMark());
+        Map<String,String> releaseMap =  new HashMap<>(releaseInfoList.size());
+        if(!CollectionUtils.isEmpty(releaseInfoList)) {
+            releaseInfoList.forEach(info -> {
+                releaseMap.put(info.getProjectMark(), info.getReleaseVersion());
+            });
+        }
+
+        List<ProjectVO> projectVOList =  projectService.getProjects(envVO,"nginx");
+        projectVOList.forEach(projectVO -> {
+            String jobName = String.format("%s-%s",projectVO.getGroup(),projectVO.getMark());
+            Map<String,String> prams =  new HashMap<>();
+            if(releaseMap.get(projectVO.getMark())!=null){
+                prams.put("git_branch",releaseMap.get(projectVO.getMark()));
             }
             jenkinsClient.build(jenkinsServer,jobName,prams);
         });

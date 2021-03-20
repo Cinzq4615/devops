@@ -11,4 +11,8 @@ import java.util.List;
  */
 public interface ProjectService {
     List<ProjectVO> getProjects(EnvVO envVO);
+
+    List<ProjectVO> getProjects(EnvVO envVO,String type);
+
+    List<ProjectVO> getProjects(EnvVO envVO,Integer id);
 }
