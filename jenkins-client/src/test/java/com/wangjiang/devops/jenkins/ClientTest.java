@@ -295,17 +295,6 @@ public class ClientTest {
                 Assert.notNull(buidId, "job制作失败");
             }
 
-//            JenkinsHttpClient jenkinsHttpClient = null;
-//            try {
-//                jenkinsHttpClient = new JenkinsHttpClient(new URI(jenkinsConfig.getUrl()), jenkinsConfig.getUsername(), jenkinsConfig.getPassword());
-//            } catch (URISyntaxException e) {
-//                e.printStackTrace();
-//            }
-//            try {
-//                jenkinsHttpClient.post(String.format(jenkinsConfig.getViewUrl(),envVO.getMark(), jobName),true);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
         });
     }
 

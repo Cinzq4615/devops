@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
-
+    <name>test</name>
     <artifactId>common-web</artifactId>
 
     <dependencies>

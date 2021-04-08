@@ -15,9 +15,9 @@
     <jenkins.model.BuildDiscarderProperty>
       <strategy class="hudson.tasks.LogRotator">
         <daysToKeep>30</daysToKeep>
-        <numToKeep>10</numToKeep>
-        <artifactDaysToKeep>-1</artifactDaysToKeep>
-        <artifactNumToKeep>-1</artifactNumToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>30</artifactDaysToKeep>
+        <artifactNumToKeep>5</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
     <hudson.model.ParametersDefinitionProperty>
@@ -79,7 +79,7 @@
           <branch></branch>
           <tagFilter>*</tagFilter>
           <branchFilter>.*</branchFilter>
-          <sortMode>NONE</sortMode>
+          <sortMode>DESCENDING</sortMode>
           <defaultValue>origin/master</defaultValue>
           <selectedValue>NONE</selectedValue>
           <useRepository>git@gitlab.xiniunet.com:xls/eBusiness-admin.git</useRepository>
@@ -100,7 +100,6 @@
           <description>发布的实例个数</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
-              <string>1</string>
               <string>2</string>
               <string>3</string>
             </a>
@@ -308,7 +307,9 @@ node {
                 --set ports.enabled20880=${enabled_20880} \
                 --set probe.port=${probe_port} \
                 --set xiniunet.group=${xiniunet_group} \
-                --set kuboard.layer=svc
+                --set kuboard.layer=svc \
+                --set imagePullSecrets[0].name=xn-regcred \
+                --set ingress.annotations.kubernetes\\\\.io\\\\/ingress\\\\.class=nginx-${release_namespace}
             &quot;&quot;&quot;,
             returnStatus:true
             )
@@ -338,7 +339,9 @@ node {
                     --set ports.enabled20880=${enabled_20880} \
                     --set probe.port=${probe_port} \
                     --set xiniunet.group=${xiniunet_group} \
-                    --set kuboard.layer=svc
+                    --set kuboard.layer=svc \
+                    --set imagePullSecrets[0].name=xn-regcred \
+                    --set ingress.annotations.kubernetes\\\\.io\\\\/ingress\\\\.class=nginx-${release_namespace}
                 &quot;&quot;&quot;
             )
         } 
@@ -361,7 +364,7 @@ node {
 	def server_status =sh(
 	script: &apos;&apos;&apos;
 	    #!/bin/bash
-	    echo &quot;获取当前项目pod状态命令:kubectl get pods --kubeconfig=&quot;/root/data/jenkins/k8s/${publish_to}/config&quot; -n ${release_namespace} | grep ^${release_name}\n&quot;
+	    echo &quot;获取当前项目pod状态命令:kubectl get pods --kubeconfig=&quot;/root/data/jenkins/k8s/config&quot; -n ${release_namespace} | grep ^${release_name}\n&quot;
         count=0
 		count_total=0
 		count_running=0

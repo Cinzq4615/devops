@@ -68,7 +68,7 @@ public class ClientProdTest {
 
     @Before
     public void setUp() throws Exception {
-        envVO.setApolloMeta("http://conf-meta-pre.xiniunet.com:8001/");
+        envVO.setApolloMeta("http://apollo-prod.xiniunet.com");
         envVO.setMark("prod");
         envVO.setNamespace("xn-prod");
         envVO.setRepository("harbor.xiniunet.com");
@@ -78,7 +78,7 @@ public class ClientProdTest {
 
 
     @Test
-    public void deletePreJob() throws  IOException, URISyntaxException  {
+    public void deleteProdJob() throws  IOException, URISyntaxException  {
         JenkinsServer jenkinsServer = new JenkinsServer(new URI(jenkinsConfig.getUrl()), jenkinsConfig.getUsername(), jenkinsConfig.getPassword());
 
         List<ProjectVO> projectVOList =  projectService.getProjects(envVO);
@@ -100,7 +100,7 @@ public class ClientProdTest {
      * 生成 pre 环境 jenkins job
      */
     @Test
-    public void GeneratePreJob() throws  IOException, URISyntaxException  {
+    public void GenerateProdJob() throws  IOException, URISyntaxException  {
         JenkinsServer jenkinsServer = new JenkinsServer(new URI(jenkinsConfig.getUrl()), jenkinsConfig.getUsername(), jenkinsConfig.getPassword());
 
         List<ProjectVO> projectVOList =  projectService.getProjects(envVO);
@@ -112,7 +112,9 @@ public class ClientProdTest {
             }else{
                 jobName = String.format("%s-%s-%s",JOB_PREFIX_PRE_APP,projectVO.getGroup(),projectVO.getMark());
             }
-            jenkinsClient.createJob(jenkinsServer, jobxml, JOB_TYPE, jobName);
+            if(!"eBusiness-web".equals(projectVO.getMark())&&!"web-svc".equals(projectVO.getMark())&&!"web-my".equals(projectVO.getMark())) {
+                jenkinsClient.createJob(jenkinsServer, jobxml, JOB_TYPE, jobName);
+            }
 
             JenkinsHttpClient jenkinsHttpClient = null;
             try {
@@ -121,7 +123,9 @@ public class ClientProdTest {
                 e.printStackTrace();
             }
             try {
-                jenkinsHttpClient.post(String.format(jenkinsConfig.getViewUrl(),envVO.getMark().toUpperCase(), jobName),true);
+                if(!"eBusiness-web".equals(projectVO.getMark())&&!"web-svc".equals(projectVO.getMark())&&!"web-my".equals(projectVO.getMark())) {
+                    jenkinsHttpClient.post(String.format(jenkinsConfig.getViewUrl(), envVO.getMark().toUpperCase(), jobName), true);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -132,9 +136,9 @@ public class ClientProdTest {
      * 生成 pre 环境
      */
     @Test
-    public void GeneratePreJobById() throws  IOException, URISyntaxException  {
+    public void GenerateProdJobById() throws  IOException, URISyntaxException  {
         JenkinsServer jenkinsServer = new JenkinsServer(new URI(jenkinsConfig.getUrl()), jenkinsConfig.getUsername(), jenkinsConfig.getPassword());
-        Integer projectId = Integer.valueOf(92);
+        Integer projectId = Integer.valueOf(539);
         List<ProjectVO> projectVOList =  projectService.getProjects(envVO,projectId);
         projectVOList.forEach(projectVO -> {
             String jobxml = Dom4jUtil.generateProdJobConfig(envVO,projectVO);
@@ -153,7 +157,8 @@ public class ClientProdTest {
                 e.printStackTrace();
             }
             try {
-                jenkinsHttpClient.post(String.format(jenkinsConfig.getViewUrl(),envVO.getMark().toUpperCase(), jobName),true);
+                jenkinsHttpClient.post(String.format(jenkinsConfig.getViewUrl(), envVO.getMark().toUpperCase(), jobName), true);
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -166,7 +171,7 @@ public class ClientProdTest {
      * 发布 test1 环境 jenkins job
      */
     @Test
-    public void BuildPreJdkAndJettyJob() throws  IOException, URISyntaxException  {
+    public void BuildProdJdkAndJettyJob() throws  IOException, URISyntaxException  {
         JenkinsServer jenkinsServer = new JenkinsServer(new URI(jenkinsConfig.getUrl()), jenkinsConfig.getUsername(), jenkinsConfig.getPassword());
 
 
@@ -189,9 +194,47 @@ public class ClientProdTest {
             }
             Map<String,String> prams =  new HashMap<>();
             if(releaseMap.get(projectVO.getMark())!=null){
-                prams.put(NAME_BRANCH_OR_TAG,releaseMap.get(projectVO.getMark()));
+                if(!"community".equals(projectVO.getMark())&&!"web-svc".equals(projectVO.getMark())&&!"web-my".equals(projectVO.getMark())) {
+                    prams.put(NAME_BRANCH_OR_TAG, releaseMap.get(projectVO.getMark()));
+                    jenkinsClient.build(jenkinsServer, jobName, prams);
+                }
             }
-            jenkinsClient.build(jenkinsServer,jobName,prams);
+
+        });
+
+    }
+
+    /**
+     * 发布 test1 环境 jenkins job
+     */
+    @Test
+    public void BuildProdNginxJob() throws  IOException, URISyntaxException  {
+        JenkinsServer jenkinsServer = new JenkinsServer(new URI(jenkinsConfig.getUrl()), jenkinsConfig.getUsername(), jenkinsConfig.getPassword());
+
+
+        //获取发布信息
+        List<ReleaseInfo> releaseInfoList =  releaseInfoService.getReleaseInfos(envVO.getMark());
+        Map<String,String> releaseMap =  new HashMap<>(releaseInfoList.size());
+        if(!CollectionUtils.isEmpty(releaseInfoList)) {
+            releaseInfoList.forEach(info -> {
+                releaseMap.put(info.getProjectMark(), info.getReleaseVersion());
+            });
+        }
+
+        List<ProjectVO> projectVOList =  projectService.getProjects(envVO,"nginx");
+        projectVOList.forEach(projectVO -> {
+            String jobName;
+            if("true".equals(projectVO.getIngressEnabled())){
+                jobName = String.format("%s-%s-%s",JOB_PREFIX_PRE_WEB,projectVO.getGroup(),projectVO.getMark());
+            }else{
+                jobName = String.format("%s-%s-%s",JOB_PREFIX_PRE_APP,projectVO.getGroup(),projectVO.getMark());
+            }
+            Map<String,String> prams =  new HashMap<>();
+            if(releaseMap.get(projectVO.getMark())!=null){
+                prams.put(NAME_BRANCH_OR_TAG,releaseMap.get(projectVO.getMark()));
+                jenkinsClient.build(jenkinsServer,jobName,prams);
+            }
+
         });
 
     }

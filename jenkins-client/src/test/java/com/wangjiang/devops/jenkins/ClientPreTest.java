@@ -68,7 +68,7 @@ public class ClientPreTest {
 
     @Before
     public void setUp() throws Exception {
-        envVO.setApolloMeta("http://conf-meta-pre.xiniunet.com:8001/");
+        envVO.setApolloMeta("http://apollo-pre.xiniunet.com");
         envVO.setMark("pre");
         envVO.setNamespace("xn-pre");
         envVO.setRepository("harbor.xiniunet.com");
@@ -189,9 +189,11 @@ public class ClientPreTest {
             }
             Map<String,String> prams =  new HashMap<>();
             if(releaseMap.get(projectVO.getMark())!=null){
-                prams.put(NAME_BRANCH_OR_TAG,releaseMap.get(projectVO.getMark()));
+                if(!"xls-community".equals(projectVO.getMark())&&!"web-svc".equals(projectVO.getMark())&&!"web-my".equals(projectVO.getMark())) {
+                    prams.put(NAME_BRANCH_OR_TAG, releaseMap.get(projectVO.getMark()));
+                    jenkinsClient.build(jenkinsServer, jobName, prams);
+                }
             }
-            jenkinsClient.build(jenkinsServer,jobName,prams);
         });
 
     }
